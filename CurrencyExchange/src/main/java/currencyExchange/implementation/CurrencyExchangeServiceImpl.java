@@ -1,8 +1,8 @@
 package currencyExchange.implementation;
 
-import java.math.BigDecimal;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import api.dto.CurrencyExchangeDto;
@@ -17,8 +17,13 @@ public class CurrencyExchangeServiceImpl implements CurrencyExchangeService {
 	private CurrencyExchangeRepository repo;
 
 	@Override
-	public CurrencyExchangeDto getExchange(String from, String to) {
-		return convertFromModelToDto(repo.findByFromAndTo(from, to));
+	public ResponseEntity<?> getExchange(String from, String to) {
+		CurrencyExchangeModel model = repo.findByFromAndTo(from, to);
+		if(model == null) {
+			return ResponseEntity.status(404).body("Requested exchange pair [" + from 
+					+ " into " + to + "] could not be found");
+		}
+		return ResponseEntity.ok(convertFromModelToDto(model));
 	}
 	
 	public CurrencyExchangeDto convertFromModelToDto(CurrencyExchangeModel model) {
